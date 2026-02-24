@@ -211,21 +211,29 @@ async function guardAll(x) {
     }
   };
 
-      const ch1 = config.urlchannel.replace("https://t.me/", "").replace("@", "");
+        const ch1 = config.urlchannel.replace("https://t.me/", "").replace("@", "");
   const ch2 = config.urlbackup.replace("https://t.me/", "").replace("@", "");
   const isOwner = userId === config.OWNER_ID.toString();
 
   // === ⚙️ CEK WAJIB JOIN CHANNEL ===
   if (checkJoinChannel() && isPrivate && !isOwner) {
     try {
-      const member1 = await bot.getChatMember(`@${ch1}`, userId);
-      const member2 = await bot.getChatMember(`@${ch2}`, userId);
-      
-      const isJoined1 = ["member", "administrator", "creator"].includes(member1.status);
-      const isJoined2 = ["member", "administrator", "creator"].includes(member2.status);
+      // Fungsi internal untuk cek status tanpa crash
+      const checkMember = async (user, chat) => {
+        try {
+          const res = await bot.getChatMember(`@${chat}`, user);
+          return ["member", "administrator", "creator"].includes(res.status);
+        } catch (e) {
+          console.log(`⚠️ Error cek @${chat}: ${e.message}`);
+          return false;
+        }
+      };
 
-      // Jika salah satu belum join, akses ditolak
+      const isJoined1 = await checkMember(userId, ch1);
+      const isJoined2 = await checkMember(userId, ch2);
+
       if (!isJoined1 || !isJoined2) {
+        // Jika ini bukan callback, kirim pesan baru. Jika callback, cukup jawab alert.
         if (!isCallback) {
           await bot.sendMessage(chatId, `
 🚫 <b>Akses Ditolak!</b>
@@ -243,13 +251,11 @@ Setelah bergabung, tekan tombol di bawah ini.`,
               }
             }
           );
-        } else {
-          await answer("❌ Kamu belum join kedua channel.", true);
         }
-        return true;
+        return true; // WAJIB RETURN TRUE agar kode di bawahnya (menu) tidak jalan
       }
     } catch (e) {
-      console.log("⚠️ Gagal cek channel:", e.message);
+      console.log("⚠️ Gagal sistem guard:", e.message);
     }
   }
 
@@ -297,38 +303,30 @@ bot.on("callback_query", async (query) => {
   const messageId = query.message.message_id;
   const userId = query.from.id;
 
-  if (userId === config.OWNER_ID.toString()) {
-    if (data === "cek_join_guard") {
-      await bot.answerCallbackQuery(query.id, { text: "OWNER detected ✓", show_alert: false });
-      return bot.sendMessage(chatId, "🚀 Owner tidak perlu join channel.");
-    }
-    return;
-  }
-
   if (data !== "cek_join_guard") return;
-  
+
   const ch1 = config.urlchannel.replace("https://t.me/", "").replace("@", "");
   const ch2 = config.urlbackup.replace("https://t.me/", "").replace("@", "");
 
   try {
-    const m1 = await bot.getChatMember(`@${ch1}`, userId);
-    const m2 = await bot.getChatMember(`@${ch2}`, userId);
+    const res1 = await bot.getChatMember(`@${ch1}`, userId).catch(() => ({status: 'left'}));
+    const res2 = await bot.getChatMember(`@${ch2}`, userId).catch(() => ({status: 'left'}));
     
-    // Harus join channel 1 DAN channel 2
-    const isJoined = ["member", "administrator", "creator"].includes(m1.status) && 
-                     ["member", "administrator", "creator"].includes(m2.status);
+    const sukses = ["member", "administrator", "creator"].includes(res1.status) && 
+                   ["member", "administrator", "creator"].includes(res2.status);
 
-    if (isJoined) {
-      await bot.deleteMessage(chatId, messageId).catch(() => {});
-      await bot.answerCallbackQuery(query.id, { text: "✅ Kamu sudah join kedua channel!", show_alert: false });
-      await bot.sendMessage(chatId, "✅ Terima kasih sudah join! Sekarang kamu bisa menggunakan bot.");
+    if (sukses) {
+      // 1. Hapus pesan peringatan biar gak menumpuk
+      await bot.deleteMessage(chatId, messageId).catch(() => {}); 
+      // 2. Beri notifikasi kecil
+      await bot.answerCallbackQuery(query.id, { text: "✅ Berhasil! Akses dibuka.", show_alert: false });
+      // 3. Kirim pesan sukses
+      await bot.sendMessage(chatId, "✅ Verifikasi berhasil! Silakan kirim perintah lagi.");
     } else {
-      // Alert jika salah satu atau keduanya belum di-join
       await bot.answerCallbackQuery(query.id, { text: "🚫 Kamu belum join kedua channel!", show_alert: true });
     }
   } catch (e) {
-    console.log("⚠️ Error cek ulang channel:", e.message);
-    await bot.answerCallbackQuery(query.id, { text: "⚠️ Gagal cek channel! Pastikan bot sudah jadi admin di channel.", show_alert: true });
+    await bot.answerCallbackQuery(query.id, { text: "⚠️ Error saat mengecek.", show_alert: true });
   }
 });
 
