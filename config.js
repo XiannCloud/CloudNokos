@@ -9,9 +9,9 @@ module.exports = {
 TOKEN: "8422030262:AAFRsynFJzbDWELVko9Ux3aTpdG6iZ0ZZLU", // Token dari @BotFather
 OWNER_ID: "8316389127", // ID Telegram owner
 urladmin: "https://t.me/Iannv1",
-urlchannel: "XiannInfo",
+urlchannel: "https://t.me/XiannInfo",
 idchannel: "-1003044771045",
-urlbackup: "XiannPdf",
+urlbackup: "https://t.me/XiannPdf", 
 idbackup: "-1003821497007",
 botName: "Xiann",
 version: "1.0",

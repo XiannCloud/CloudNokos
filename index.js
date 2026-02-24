@@ -277,7 +277,7 @@ async function guardAll(x) {
     }
   };
 
-    const ch1 = config.urlchannel.replace("https://t.me/", "").replace("@", "");
+      const ch1 = config.urlchannel.replace("https://t.me/", "").replace("@", "");
   const ch2 = config.urlbackup.replace("https://t.me/", "").replace("@", "");
   const isOwner = userId === config.OWNER_ID.toString();
 
@@ -290,6 +290,7 @@ async function guardAll(x) {
       const isJoined1 = ["member", "administrator", "creator"].includes(member1.status);
       const isJoined2 = ["member", "administrator", "creator"].includes(member2.status);
 
+      // Jika salah satu belum join, akses ditolak
       if (!isJoined1 || !isJoined2) {
         if (!isCallback) {
           await bot.sendMessage(chatId, `
@@ -301,8 +302,8 @@ Setelah bergabung, tekan tombol di bawah ini.`,
               parse_mode: "HTML",
               reply_markup: {
                 inline_keyboard: [
-                  [{ text: "🔗 Join Channel", url: config.urlchannel }],
-                  [{ text: "🔗 Join Channel", url: config.urlbackup }],
+                  [{ text: "🔗 Join Channel", url: `https://t.me/${ch1}` }],
+                  [{ text: "🔗 Join Channel", url: `https://t.me/${ch2}` }],
                   [{ text: "✅ Sudah Join", callback_data: "cek_join_guard" }]
                 ]
               }
@@ -379,6 +380,7 @@ bot.on("callback_query", async (query) => {
     const m1 = await bot.getChatMember(`@${ch1}`, userId);
     const m2 = await bot.getChatMember(`@${ch2}`, userId);
     
+    // Harus join channel 1 DAN channel 2
     const isJoined = ["member", "administrator", "creator"].includes(m1.status) && 
                      ["member", "administrator", "creator"].includes(m2.status);
 
@@ -387,6 +389,7 @@ bot.on("callback_query", async (query) => {
       await bot.answerCallbackQuery(query.id, { text: "✅ Kamu sudah join kedua channel!", show_alert: false });
       await bot.sendMessage(chatId, "✅ Terima kasih sudah join! Sekarang kamu bisa menggunakan bot.");
     } else {
+      // Alert jika salah satu atau keduanya belum di-join
       await bot.answerCallbackQuery(query.id, { text: "🚫 Kamu belum join kedua channel!", show_alert: true });
     }
   } catch (e) {
