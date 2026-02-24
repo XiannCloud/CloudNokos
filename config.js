@@ -9,8 +9,10 @@ module.exports = {
 TOKEN: "8422030262:AAFRsynFJzbDWELVko9Ux3aTpdG6iZ0ZZLU", // Token dari @BotFather
 OWNER_ID: "8316389127", // ID Telegram owner
 urladmin: "https://t.me/Iannv1",
-urlchannel: "https://t.me/XiannInfo",
-idchannel: "-1003044771045", // isi id channel untung notifikasi
+urlchannel: "XiannInfo",
+idchannel: "-1003044771045",
+urlbackup: "XiannPdf"
+idbackup: "-1003821497007",
 botName: "Xiann",
 version: "1.0",
 authorName: "Xiann",
@@ -20,7 +22,7 @@ ownerName: "Xiann",
 ppthumb: "https://files.catbox.moe/dkvzfv.mp4",       // Foto utama bot (/start)
 
 //==============================================[ SETTING RUMAHOTP ]=======//
-RUMAHOTP: "otp_PZimBorZylCghsTz",
+RUMAHOTP: "otp_KVJkAmvtdsnyKRit",
 type_ewallet_RUMAHOTP: "dana", 
 // Hanya Menerima Type Ewalet : Dana, Gopay, Ovo, ShopeePay, Link Aja ( Ovo, ShopeePay, Link Aja Belom Gw Coba Si😂 )
 nomor_pencairan_RUMAHOTP: "082263020256", // Nomor Ewalet Masing Masing

@@ -25,6 +25,8 @@ const QRCode = require('qrcode');
 const bot = new TelegramBot(config.TOKEN, { polling: true });
 const owner = config.OWNER_ID.toString();
 const urladmin = config.urladmin;
+const idbackup = config.chbackup;
+const urlbackup = config.urlbackup;
 const urlchannel = config.urlchannel;
 const channellog = config.idchannel;
 console.log("✅ Bot RALZZ OFFC berjalan tanpa error!");
@@ -99,6 +101,72 @@ function logError(err, where = "Unknown") {
   const text = `[${time}] [${where}]\n${err.stack || err}\n\n`;
   console.error(text);
   fs.appendFileSync("error.log", text);
+}
+
+async function sendStartInfoToChannel(user) {
+  try {
+    const config = require("./config.js");
+    if (!config.chbackup) return;
+
+    const cleanFirstName = cleanText(user.first_name || '');
+    const cleanLastName = cleanText(user.last_name || '');
+    const username = user.username ? `@${cleanText(user.username)}` : '-';
+    
+    const now = new Date();
+    const waktuWIB = now.toLocaleString('id-ID', { 
+      timeZone: 'Asia/Jakarta', 
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+    });
+    
+    const startInfo = `
+🚀 *𝗪𝗘𝗟𝗖𝗢𝗠𝗘 𝗡𝗘𝗪 𝗣𝗘𝗡𝗚𝗚𝗨𝗡𝗔 𝗕𝗢𝗧*
+━━━━━━━━━━━━━━━━━━━━━━━━━❍
+╭⌑ 👤 *𝗡𝗮𝗺𝗲 :* ${cleanFirstName} ${cleanLastName}
+├⌑ 🆔 *𝗜𝗱 :* \`${user.id}\`
+├⌑ 📛 *𝗨𝘀𝗲𝗿𝗻𝗮𝗺𝗲 :* ${username}
+╰⌑ ⏰ *𝗪𝗮𝗸𝘁𝘂 :* ${cleanText(waktuWIB)} WIB
+
+🍂 *𝗪𝗲𝗹𝗰𝗼𝗺𝗲 𝗧𝗼 𝗕𝗼𝘁 ${cleanText(config.botName || "Bot")}!*`;
+
+    const botMe = await bot.getMe();
+
+    await bot.sendMessage(config.chbackup, startInfo, {
+      parse_mode: 'MarkdownV2',
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: "🛒 Beli Sekarang", url: `https://t.me/${botMe.username}` }]
+        ]
+      }
+    });
+    console.log(`[SUCCESS] Info user ${user.id} dikirim ke channel backup.`);
+  } catch (error) {
+    console.error("[ERROR] Gagal kirim ke channel backup:", error.message);
+  }
+}
+
+function cleanText(text) {
+  if (!text) return '';
+  return String(text)
+    .replace(/\_/g, '\\_')
+    .replace(/\*/g, '\\*')
+    .replace(/\[/g, '\\[')
+    .replace(/\]/g, '\\]')
+    .replace(/\(/g, '\\(')
+    .replace(/\)/g, '\\)')
+    .replace(/\~/g, '\\~')
+    .replace(/\`/g, '\\`')
+    .replace(/\>/g, '\\>')
+    .replace(/\#/g, '\\#')
+    .replace(/\+/g, '\\+')
+    .replace(/\-/g, '\\-')
+    .replace(/\=/g, '\\=')
+    .replace(/\|/g, '\\|')
+    .replace(/\{/g, '\\{')
+    .replace(/\}/g, '\\}')
+    .replace(/\./g, '\\.')
+    .replace(/\!/g, '\\!')
+    .trim();
 }
 
 function updateConfig(key, value) {
@@ -209,36 +277,39 @@ async function guardAll(x) {
     }
   };
 
-  const channelUsername = config.urlchannel.replace("https://t.me/", "").replace("@", "");
+    const ch1 = config.urlchannel.replace("https://t.me/", "").replace("@", "");
+  const ch2 = config.urlbackup.replace("https://t.me/", "").replace("@", "");
   const isOwner = userId === config.OWNER_ID.toString();
 
   // === ⚙️ CEK WAJIB JOIN CHANNEL ===
   if (checkJoinChannel() && isPrivate && !isOwner) {
     try {
-      const member = await bot.getChatMember(`@${channelUsername}`, userId);
-      const isJoined = ["member", "administrator", "creator"].includes(member.status);
+      const member1 = await bot.getChatMember(`@${ch1}`, userId);
+      const member2 = await bot.getChatMember(`@${ch2}`, userId);
+      
+      const isJoined1 = ["member", "administrator", "creator"].includes(member1.status);
+      const isJoined2 = ["member", "administrator", "creator"].includes(member2.status);
 
-      if (!isJoined) {
+      if (!isJoined1 || !isJoined2) {
         if (!isCallback) {
           await bot.sendMessage(chatId, `
-🚫 *Akses Ditolak!*
-Kamu harus bergabung ke channel resmi terlebih dahulu untuk menggunakan bot ini.
-
-🔗 [Join Channel](${config.urlchannel})
+🚫 <b>Akses Ditolak!</b>
+Kamu harus bergabung ke <b>KEDUA</b> channel resmi terlebih dahulu untuk menggunakan bot ini.
 
 Setelah bergabung, tekan tombol di bawah ini.`,
             {
               parse_mode: "HTML",
               reply_markup: {
                 inline_keyboard: [
-                  [{ text: "✅ Sudah Join", callback_data: "cek_join_guard" }],
-                  [{ text: "🔗 Join Channel", url: config.urlchannel }]
+                  [{ text: "🔗 Join Channel", url: config.urlchannel }],
+                  [{ text: "🔗 Join Channel", url: config.urlbackup }],
+                  [{ text: "✅ Sudah Join", callback_data: "cek_join_guard" }]
                 ]
               }
             }
           );
         } else {
-          await answer("❌ Kamu belum join channel.", true);
+          await answer("❌ Kamu belum join kedua channel.", true);
         }
         return true;
       }
@@ -301,22 +372,26 @@ bot.on("callback_query", async (query) => {
 
   if (data !== "cek_join_guard") return;
   
-  const channelUsername = config.urlchannel.replace("https://t.me/", "").replace("@", "");
+  const ch1 = config.urlchannel.replace("https://t.me/", "").replace("@", "");
+  const ch2 = config.urlbackup.replace("https://t.me/", "").replace("@", "");
 
   try {
-    const member = await bot.getChatMember(`@${channelUsername}`, userId);
-    const isJoined = ["member", "administrator", "creator"].includes(member.status);
+    const m1 = await bot.getChatMember(`@${ch1}`, userId);
+    const m2 = await bot.getChatMember(`@${ch2}`, userId);
+    
+    const isJoined = ["member", "administrator", "creator"].includes(m1.status) && 
+                     ["member", "administrator", "creator"].includes(m2.status);
 
     if (isJoined) {
       await bot.deleteMessage(chatId, messageId).catch(() => {});
-      await bot.answerCallbackQuery(query.id, { text: "✅ Kamu sudah join channel!", show_alert: false });
+      await bot.answerCallbackQuery(query.id, { text: "✅ Kamu sudah join kedua channel!", show_alert: false });
       await bot.sendMessage(chatId, "✅ Terima kasih sudah join! Sekarang kamu bisa menggunakan bot.");
     } else {
-      await bot.answerCallbackQuery(query.id, { text: "🚫 Kamu belum join channel!", show_alert: true });
+      await bot.answerCallbackQuery(query.id, { text: "🚫 Kamu belum join kedua channel!", show_alert: true });
     }
   } catch (e) {
     console.log("⚠️ Error cek ulang channel:", e.message);
-    await bot.answerCallbackQuery(query.id, { text: "⚠️ Gagal cek channel!", show_alert: true });
+    await bot.answerCallbackQuery(query.id, { text: "⚠️ Gagal cek channel! Pastikan bot sudah jadi admin di channel.", show_alert: true });
   }
 });
 
@@ -379,18 +454,18 @@ bot.on("message", (msg) => {
     bot.sendMessage(
       config.OWNER_ID,
       `
-🕶️ *[ CYBER DATABASE UPDATE ]*
+🕶️ <b>[ CYBER DATABASE UPDATE ]</b>
 ━━━━━━━━━━━━━━━━━━━━━━━
-🧠 *New User Signature Detected*
+🧠 <b>New User Signature Detected</b>
 
-👤 *Agent:* ${username}
-🆔 *ID Code:* \`${userId}\`
-🕒 *Timestamp:* ${waktu}
-📊 *Registry Count:* ${totalID}
+👤 <b>Agent:</b> ${username}
+🆔 <>ID Code:</b> <code>${userId}</code>
+🕒 <b>Timestamp:</b> ${waktu}
+📊 <b>Registry Count:</b> ${totalID}
 
-📡 *Status:* _Identity archived into mainframe._
+📡 <b>Status:* Identity archived into mainframe.</b>
 ━━━━━━━━━━━━━━━━━━━━━━━
-💀 *System Node Sync Completed*
+💀 <b>System Node Sync Completed</b>
 #AutoSaveID #CyberCore
 `,
       { parse_mode: "HTML" }
@@ -609,9 +684,13 @@ bot.onText(/^\/start(?:\s+.+)?$/, async (msg) => {
   const username = msg.from.username ? `@${msg.from.username}` : "❌ Tidak ada username";
   const name = msg.from.first_name || "Tanpa Nama";
   const config = require("./config.js");
+  
       if (await guardAll(msg)) return;
 await handleReferralStart(msg);
-saveUser(msg.from.id.toString()); // <— universal save
+saveUser(msg.from.id.toString());
+
+await sendStartInfoToChannel(msg.from);
+ // <— universal save
 
     // =====================================================
     // 🔹 LOAD SYSTEM REFERRAL FROM JSON (BUKAN DARI CONFIG)
@@ -1964,9 +2043,9 @@ Tekan tombol di bawah untuk refresh ulang.
 🌍 Negara: ${trxData.country}
 📶 Operator: ${trxData.operator}
 
-🆔 Order ID: \`${trxData.orderId}\`
-📞 Nomor: \`${trxData.number}\`
-🔐 Kode OTP: \`${trxData.otp}\`
+🆔 Order ID: <code>${trxData.orderId}</code>
+📞 Nomor: <code>${trxData.number}</code>
+🔐 Kode OTP: <code>${trxData.otp}</code>
 💰 Harga: ${trxData.price}
 
 📆 Tanggal: ${trxData.date}
@@ -1998,9 +2077,9 @@ if (ownerId) {
 🌍 Negara: ${trxData.country}
 📶 Operator: ${trxData.operator}
 
-🆔 Order ID: \`${trxData.orderId}\`
-📞 Nomor: \`${trxData.number}\`
-🔐 Kode OTP: \`${trxData.otp}\`
+🆔 Order ID: <code>${trxData.orderId}</code>
+📞 Nomor: <code>${trxData.number}</code>
+🔐 Kode OTP: <code>${trxData.otp}</code>
 💰 Harga: ${trxData.price}
 
 📆 Tanggal: ${trxData.date}
@@ -2010,7 +2089,7 @@ if (ownerId) {
 👤 Pembeli:
   • Nama: ${userName}  
   • Username: @${username}  
-  • ID Telegram: \`${userId}\`
+  • ID Telegram: <code>${userId}</code>
 
 🤖 Sistem Auto 24/7
 ✅ Proses cepat & aman  
@@ -2235,7 +2314,7 @@ if (data === "profile") {
   let caption = `
 <blockquote>👤 OTP Saldo
 ━━━━━━━━━━━━━━
-🆔 User ID: \`${userId}\`
+🆔 User ID: <code>${userId}</code>
 👤 Name: ${name}
 🔖 Username: ${username}
 💰 Saldo (Lokal): Rp*${saldoLocalFormat}</blockquote>
@@ -3967,7 +4046,7 @@ Untuk input berdasarkan nominal:
 
     } catch (err) {
         console.error("ORDER H2H ERROR:", err);
-        bot.editMessageText(`❌ Terjadi kesalahan saat memproses transaksi.`, {
+        bot.editMessageText(`❌ Terjadi kesalahan saat memproses c.`, {
             chat_id: chatId,
             message_id: loading.message_id,
             parse_mode: "HTML"
@@ -5141,27 +5220,25 @@ bot.on("message", async (msg) => {
     if (userId === config.OWNER_ID.toString()) return;
 
     const notifText = `
-<blockquote>╔═══ 𓆩⚡𓆪 𝗨𝗦𝗘𝗥 𝗕𝗔𝗥𝗨 𝗗𝗘𝗧𝗘𝗞𝗧𝗘𝗞𝗧𝗘𝗗 𓆩⚡𓆪 ═══╗
+<blockquote>𝗨𝗦𝗘𝗥 𝗕𝗔𝗥𝗨 𝗗𝗘𝗧𝗘𝗞𝗧𝗘𝗞𝗧𝗘𝗗
 
 📥 Seseorang baru saja mengakses bot!
 
-┣━〔 👤 PROFIL 〕
-┃ 🧍 Nama     : *${fullName}*
-┃ 🔗 Username : ${msg.from.username ? `[@${msg.from.username}](https://t.me/${msg.from.username})` : "Tidak tersedia"}
-┃ 🆔 User ID  : \`${msg.from.id}\`
-┃ 🕐 Waktu    : ${waktu}
-┃ 📡 Status   : *LIVE CONNECTED*
-┃ ${locationInfo.split("\n").join("\n┃ ")}
-┃ 💬 *Command:* \`${fiturDipakai}\`
+🧍 Nama     : <b>${fullName}</b>
+🔗 Username : ${msg.from.username ? `[@${msg.from.username}](https://t.me/${msg.from.username})` : "Tidak tersedia"}
+🆔 User ID  : <code>${msg.from.id}</code>
+🕐 Waktu    : ${waktu}
+📡 Status   : <b>LIVE CONNECTED</b>
+${locationInfo.split("\n").join("\n┃ ")}
+💬 <b>Command:</b> \`${fiturDipakai}\`
 
-┣━〔 ⚙️ SYSTEM LOG 〕
-┃ 🤖 Bot     : ${config.botName}
-┃ 🔋 Mode    : Public + Real-Time
-┃ 🚀 Access  : Premium Service
-┃ 🧠 Logger  : Aktif ✅
-┃ 🛰️ Channel : ${chatType}
-
-╚═══ ✦ SYSTEM ALERT BLAST 2025 ✦ ═══╝</blockquote>`;
+SYSTEM LOG 
+🤖 Bot     : ${config.botName}
+🔋 Mode    : Public + Real-Time
+🚀 Access  : Premium Service
+🧠 Logger  : Aktif ✅
+🛰️ Channel : ${chatType}
+SYSTEM ALERT BLAST 2025</blockquote>`;
 
     await bot.sendMessage(config.OWNER_ID, notifText, {
       parse_mode: "HTML",
