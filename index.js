@@ -692,7 +692,7 @@ bot.onText(/^\/start(?:\s+.+)?$/, async (msg) => {
 await handleReferralStart(msg);
 saveUser(msg.from.id.toString());
 
-await sendStartInfoToChannel(msg.from);
+await sendStartInfoToChannel(msg.from, bot);
  // <— universal save
 
     // =====================================================
