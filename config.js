@@ -11,7 +11,7 @@ OWNER_ID: "8316389127", // ID Telegram owner
 urladmin: "https://t.me/Iannv1",
 urlchannel: "XiannInfo",
 idchannel: "-1003044771045",
-urlbackup: "XiannPdf"
+urlbackup: "XiannPdf",
 idbackup: "-1003821497007",
 botName: "Xiann",
 version: "1.0",
