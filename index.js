@@ -103,72 +103,6 @@ function logError(err, where = "Unknown") {
   fs.appendFileSync("error.log", text);
 }
 
-async function sendStartInfoToChannel(user) {
-  try {
-    const config = require("./config.js");
-    if (!config.idbackup) return;
-
-    const cleanFirstName = cleanText(user.first_name || '');
-    const cleanLastName = cleanText(user.last_name || '');
-    const username = user.username ? `@${cleanText(user.username)}` : '-';
-    
-    const now = new Date();
-    const waktuWIB = now.toLocaleString('id-ID', { 
-      timeZone: 'Asia/Jakarta', 
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-    });
-    
-    const startInfo = `
-🚀 *𝗪𝗘𝗟𝗖𝗢𝗠𝗘 𝗡𝗘𝗪 𝗣𝗘𝗡𝗚𝗚𝗨𝗡𝗔 𝗕𝗢𝗧*
-━━━━━━━━━━━━━━━━━━━━━━━━━❍
-╭⌑ 👤 *𝗡𝗮𝗺𝗲 :* ${cleanFirstName} ${cleanLastName}
-├⌑ 🆔 *𝗜𝗱 :* \`${user.id}\`
-├⌑ 📛 *𝗨𝘀𝗲𝗿𝗻𝗮𝗺𝗲 :* ${username}
-╰⌑ ⏰ *𝗪𝗮𝗸𝘁𝘂 :* ${cleanText(waktuWIB)} WIB
-
-🍂 *𝗪𝗲𝗹𝗰𝗼𝗺𝗲 𝗧𝗼 𝗕𝗼𝘁 ${cleanText(config.botName || "Bot")}!*`;
-
-    const botMe = await bot.getMe();
-
-    await bot.sendMessage(config.idbackup, startInfo, {
-      parse_mode: 'MarkdownV2',
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: "🛒 Beli Sekarang", url: `https://t.me/${botMe.username}` }]
-        ]
-      }
-    });
-    console.log(`[SUCCESS] Info user ${user.id} dikirim ke channel backup.`);
-  } catch (error) {
-    console.error("[ERROR] Gagal kirim ke channel backup:", error.message);
-  }
-}
-
-function cleanText(text) {
-  if (!text) return '';
-  return String(text)
-    .replace(/\_/g, '\\_')
-    .replace(/\*/g, '\\*')
-    .replace(/\[/g, '\\[')
-    .replace(/\]/g, '\\]')
-    .replace(/\(/g, '\\(')
-    .replace(/\)/g, '\\)')
-    .replace(/\~/g, '\\~')
-    .replace(/\`/g, '\\`')
-    .replace(/\>/g, '\\>')
-    .replace(/\#/g, '\\#')
-    .replace(/\+/g, '\\+')
-    .replace(/\-/g, '\\-')
-    .replace(/\=/g, '\\=')
-    .replace(/\|/g, '\\|')
-    .replace(/\{/g, '\\{')
-    .replace(/\}/g, '\\}')
-    .replace(/\./g, '\\.')
-    .replace(/\!/g, '\\!')
-    .trim();
-}
-
 function updateConfig(key, value) {
   let fileData = fs.readFileSync(configPath, "utf8");
 
@@ -678,6 +612,77 @@ async function handleReferralStart(msg) {
     console.error("handleReferralStart error:", err);
   }
 }
+
+async function sendStartInfoToChannel(user) {
+  try {
+    const config = require("./config.js");
+    
+    // Cek apakah variabel idbackup ada di config
+    if (!config.idbackup) {
+      console.log("[INFO] idbackup belum diatur di config.js");
+      return;
+    }
+
+    const name = (user.first_name || '') + ' ' + (user.last_name || '');
+    const username = user.username ? `@${user.username}` : "-";
+    
+    const now = new Date();
+    const waktuWIB = now.toLocaleString('id-ID', { 
+      timeZone: 'Asia/Jakarta', 
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+    });
+    
+    const startInfo = `
+🚀 <b>𝗪𝗘𝗟𝗖𝗢𝗠𝗘 𝗡𝗘𝗪 𝗣𝗘𝗡𝗚𝗚𝗨𝗡𝗔 𝗕𝗢𝗧</b>
+━━━━━━━━━━━━━━━━━━━━━━━━━❍
+╭⌑ 👤 <b>𝗡𝗮𝗺𝗲 :</b> ${name}
+├⌑ 🆔 <b>𝗜𝗱 :</b> <code>${user.id}</code>
+├⌑ 📛 <b>𝗨𝘀𝗲𝗿𝗻𝗮𝗺𝗲 :</b> ${username}
+╰⌑ ⏰ <b>𝗪𝗮𝗸𝘁𝘂 :</b> ${waktuWIB} WIB
+
+🍂 <b>𝗪𝗲𝗹𝗰𝗼𝗺𝗲 𝗧𝗼 𝗕𝗼𝘁 ${config.botName || "Bot"}!</b>`;
+
+    const botMe = await bot.getMe();
+
+    await bot.sendMessage(config.idbackup, startInfo, {
+      parse_mode: 'HTML',
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: "🛒 Beli Sekarang", url: `https://t.me/${botMe.username}` }]
+        ]
+      }
+    });
+
+    console.log(`[SUCCESS] Info user ${user.id} dikirim ke channel backup.`);
+  } catch (error) {
+    console.error("[ERROR] Gagal kirim ke channel backup:", error.message);
+  }
+}
+
+function cleanText(text) {
+  if (!text) return '';
+  return String(text)
+    .replace(/\_/g, '\\_')
+    .replace(/\*/g, '\\*')
+    .replace(/\[/g, '\\[')
+    .replace(/\]/g, '\\]')
+    .replace(/\(/g, '\\(')
+    .replace(/\)/g, '\\)')
+    .replace(/\~/g, '\\~')
+    .replace(/\`/g, '\\`')
+    .replace(/\>/g, '\\>')
+    .replace(/\#/g, '\\#')
+    .replace(/\+/g, '\\+')
+    .replace(/\-/g, '\\-')
+    .replace(/\=/g, '\\=')
+    .replace(/\|/g, '\\|')
+    .replace(/\{/g, '\\{')
+    .replace(/\}/g, '\\}')
+    .replace(/\./g, '\\.')
+    .replace(/\!/g, '\\!')
+    .trim();
+}
 // ==============================================
 // 💠 FITUR /nokos — VirtuSIM RALZZ EDITION (UI Premium)
 // ==============================================
@@ -692,7 +697,7 @@ bot.onText(/^\/start(?:\s+.+)?$/, async (msg) => {
 await handleReferralStart(msg);
 saveUser(msg.from.id.toString());
 
-await sendStartInfoToChannel(msg.from, bot);
+await sendStartInfoToChannel(msg.from);
  // <— universal save
 
     // =====================================================
