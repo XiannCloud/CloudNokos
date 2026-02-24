@@ -211,51 +211,58 @@ async function guardAll(x) {
     }
   };
 
-        const ch1 = config.urlchannel.replace("https://t.me/", "").replace("@", "");
+          // Pastikan username bersih
+  const ch1 = config.urlchannel.replace("https://t.me/", "").replace("@", "");
   const ch2 = config.urlbackup.replace("https://t.me/", "").replace("@", "");
   const isOwner = userId === config.OWNER_ID.toString();
 
   // === ⚙️ CEK WAJIB JOIN CHANNEL ===
   if (checkJoinChannel() && isPrivate && !isOwner) {
     try {
-      // Fungsi internal untuk cek status tanpa crash
-      const checkMember = async (user, chat) => {
+      // Fungsi cek member yang lebih stabil
+      const getMemberStatus = async (user, channel) => {
         try {
-          const res = await bot.getChatMember(`@${chat}`, user);
+          const res = await bot.getChatMember(`@${channel}`, user);
           return ["member", "administrator", "creator"].includes(res.status);
         } catch (e) {
-          console.log(`⚠️ Error cek @${chat}: ${e.message}`);
+          // Jika bot bukan admin, dia akan log error 400 'member list is inaccessible'
+          console.log(`⚠️ Log: Gagal cek @${channel}. Pastikan bot jadi Admin!`);
           return false;
         }
       };
 
-      const isJoined1 = await checkMember(userId, ch1);
-      const isJoined2 = await checkMember(userId, ch2);
+      const isJ1 = await getMemberStatus(userId, ch1);
+      const isJ2 = await getMemberStatus(userId, ch2);
 
-      if (!isJoined1 || !isJoined2) {
-        // Jika ini bukan callback, kirim pesan baru. Jika callback, cukup jawab alert.
-        if (!isCallback) {
-          await bot.sendMessage(chatId, `
+      // Jika salah satu belum join
+      if (!isJ1 || !isJ2) {
+        // PENTING: Jika ini panggila dari callback, kita hanya kirim answerCallback
+        if (isCallback) {
+          await answer("❌ Kamu belum join di kedua channel!", true);
+          return true;
+        }
+
+        // Kirim pesan join (HANYA SEKALI)
+        await bot.sendMessage(chatId, `
 🚫 <b>Akses Ditolak!</b>
 Kamu harus bergabung ke <b>KEDUA</b> channel resmi terlebih dahulu untuk menggunakan bot ini.
 
 Setelah bergabung, tekan tombol di bawah ini.`,
-            {
-              parse_mode: "HTML",
-              reply_markup: {
-                inline_keyboard: [
-                  [{ text: "🔗 Join Channel", url: `https://t.me/${ch1}` }],
-                  [{ text: "🔗 Join Channel", url: `https://t.me/${ch2}` }],
-                  [{ text: "✅ Sudah Join", callback_data: "cek_join_guard" }]
-                ]
-              }
+          {
+            parse_mode: "HTML",
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: "🔗 Join Channel 1", url: `https://t.me/${ch1}` }],
+                [{ text: "🔗 Join Channel 2", url: `https://t.me/${ch2}` }],
+                [{ text: "✅ Sudah Join", callback_data: "cek_join_guard" }]
+              ]
             }
-          );
-        }
-        return true; // WAJIB RETURN TRUE agar kode di bawahnya (menu) tidak jalan
+          }
+        );
+        return true; // Stop eksekusi agar menu tidak muncul
       }
     } catch (e) {
-      console.log("⚠️ Gagal sistem guard:", e.message);
+      console.log("⚠️ Error Guard:", e.message);
     }
   }
 
