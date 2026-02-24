@@ -2,10 +2,10 @@ process.on("unhandledRejection", (reason) => console.log("[ANTI CRASH] Unhandled
 process.on("uncaughtException", (err) => console.log("[ANTI CRASH] Uncaught Exception:", err));
 process.on("uncaughtExceptionMonitor", (err) => console.log("[ANTI CRASH MONITOR]:", err));
 
-const express = require('express');
-const app = express();
-app.get('/', (req, res) => res.send('Bot is Online!'));
-app.listen(process.env.PORT || 3000, () => console.log('Web server ready'));
+app.get('/', (req, res) => res.send('Bot Hidup!'));
+app.listen(process.env.PORT || 3000, () => {
+    console.log('Server express jalan...');
+});
 
 const config = require("./config.js");
 const TelegramBot = require("node-telegram-bot-api");
