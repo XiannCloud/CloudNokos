@@ -613,26 +613,34 @@ async function handleReferralStart(msg) {
   }
 }
 
+// --- FIX: FUNGSI KIRIM INFO KE CHANNEL (MODE HTML) ---
 async function sendStartInfoToChannel(user) {
   try {
     const config = require("./config.js");
     
-    // Cek apakah variabel idbackup ada di config
+    // Pastikan idbackup ada di config.js
     if (!config.idbackup) {
-      console.log("[INFO] idbackup belum diatur di config.js");
+      console.log("[INFO] Variabel idbackup tidak ditemukan di config.js");
       return;
     }
 
-    const name = (user.first_name || '') + ' ' + (user.last_name || '');
+    const name = (user.first_name || '') + (user.last_name ? ' ' + user.last_name : '');
     const username = user.username ? `@${user.username}` : "-";
     
     const now = new Date();
     const waktuWIB = now.toLocaleString('id-ID', { 
       timeZone: 'Asia/Jakarta', 
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit', 
+      minute: '2-digit', 
+      second: '2-digit', 
+      hour12: false
     });
     
+    // Pakai tag HTML supaya kebal dari error karakter khusus seperti (!) atau (.)
     const startInfo = `
 🚀 <b>𝗪𝗘𝗟𝗖𝗢𝗠𝗘 𝗡𝗘𝗪 𝗣𝗘𝗡𝗚𝗚𝗨𝗡𝗔 𝗕𝗢𝗧</b>
 ━━━━━━━━━━━━━━━━━━━━━━━━━❍
@@ -649,13 +657,14 @@ async function sendStartInfoToChannel(user) {
       parse_mode: 'HTML',
       reply_markup: {
         inline_keyboard: [
-          [{ text: "🛒 Beli Sekarang", url: `https://t.me/${botMe.username}` }]
+          [{ text: "🛒 BUY NOW", url: `https://t.me/${botMe.username}` }]
         ]
       }
     });
 
-    console.log(`[SUCCESS] Info user ${user.id} dikirim ke channel backup.`);
+    console.log(`[SUCCESS] Info user ${user.id} berhasil dikirim ke channel backup.`);
   } catch (error) {
+    // Log ini bakal kasih tau kalau ada masalah ID channel atau bot bukan admin
     console.error("[ERROR] Gagal kirim ke channel backup:", error.message);
   }
 }
