@@ -1,0 +1,47 @@
+{
+  "name": "base-telegram-bot",
+  "version": "1.0.0",
+  "description": "Base Telegram",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+    "keywords": [
+    "telegram-bot",
+    "anti-error",
+    "stabil",
+    "auto-restart",
+    "self-healing",
+    "auto-forward",
+    "auto-bcuser"
+  ],
+  "author": "NDY OFFC",
+  "license": "MIT",
+  "dependencies": {
+    "pino": "^9.6.0", 
+    "child_process": "latest",    
+    "form-data": "^4.0.0",        
+    "chalk": "^4.1.2",    
+    "axios": "^1.9.0",
+    "canvas": "^3.1.0",    
+    "qs": "latest",    
+    "qrcode": "latest",    
+    "crypto": "latest",
+    "figlet": "^1.5.0",    
+    "telegraf": "latest",            
+    "fs": "0.0.1-security",     
+    "fs-extra": "^11.2.0",    
+    "node-fetch": "^2.7.0",    
+    "node-telegram-bot-api": "^0.64.0",
+    "moment-timezone": "latest",
+    "moment": "^2.30.1",
+    "ssh2": "^1.16.0"    
+  },
+  "engines": {
+    "node": ">=18.0.0"  
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
