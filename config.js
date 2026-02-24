@@ -20,7 +20,7 @@ ownerName: "Xiann",
 ppthumb: "https://files.catbox.moe/dkvzfv.mp4",       // Foto utama bot (/start)
 
 //==============================================[ SETTING RUMAHOTP ]=======//
-RUMAHOTP: "otp_KVJkAmvtdsnyKRit",
+RUMAHOTP: "otp_PZimBorZylCghsTz",
 type_ewallet_RUMAHOTP: "dana", 
 // Hanya Menerima Type Ewalet : Dana, Gopay, Ovo, ShopeePay, Link Aja ( Ovo, ShopeePay, Link Aja Belom Gw Coba Si😂 )
 nomor_pencairan_RUMAHOTP: "082263020256", // Nomor Ewalet Masing Masing
