@@ -613,7 +613,7 @@ async function handleReferralStart(msg) {
   }
 }
 
-adync function sendStartInfoToChannel(user) {
+async function sendStartInfoToChannel(user) {
   try {
     const config = require("./config.js");
     if (!config.idbackup) return;
