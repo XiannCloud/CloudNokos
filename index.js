@@ -2046,9 +2046,9 @@ if (channellog && channellog !== "" && channellog !== "0") {
 🌍 Negara: ${trxData.country}
 📶 Operator: ${trxData.operator}
 
-🆔 Order ID: ${trxData.orderId}
-📞 Nomor: \`+${phoneMasked}\`
-🔐 Kode OTP: \`${otpMasked}\`
+🆔 Order ID: <code>${trxData.orderId}</code>
+📞 Nomor: <code>+${phoneMasked}</code>
+🔐 Kode OTP: <code>${otpMasked}</code>
 💰 Harga: ${trxData.price}
 
 📆 Tanggal: ${trxData.date}
@@ -2056,7 +2056,7 @@ if (channellog && channellog !== "" && channellog !== "0") {
 👤 Pembeli: 
   • Nama: ${userName}  
   • Username: @${username}  
-  • ID Telegram: \`${userId}\`
+  • ID Telegram: <code>${userId}</code>
 
 🤖 Sistem Auto 24/7 
 ✅ Proses cepat & aman  
@@ -3215,8 +3215,8 @@ if (s === "success") {
     const successMsg = `
 <blockquote>💰 DEPOSIT OTP BERHASIL!
 
-🧾 ID Pembayaran: \`${checkRes.data.data.id}\`
-👤 User: @${username} (\`${userId}\`)
+🧾 ID Pembayaran: <code>${checkRes.data.data.id}</code>
+👤 User: @${username} (<code>${userId}</code>)
 💰 Nominal: Rp${totalBaru.toLocaleString("id-ID")}
 💵 Biaya Admin: Rp${feeAkhir.toLocaleString("id-ID")}
 📥 Diterima: Rp${diterima.toLocaleString("id-ID")}
@@ -3325,7 +3325,7 @@ bot.on("callback_query", async (cb) => {
       await bot.sendMessage(chatId, `
 <blockquote>❌ Pembayaran Dibatalkan!
 ━━━━━━━━━━━━━━━━━━
-🧾 ID Transaksi: \`${depositId}\`
+🧾 ID Transaksi: <code>${depositId}</code>
 👤 User: [${cb.from.first_name}](tg://user?id=${userId})
 💰 Nominal: Rp${totalNominal.toLocaleString('id-ID')}
 💬 Status: Cancelled oleh pengguna</blockquote>
