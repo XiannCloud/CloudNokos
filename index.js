@@ -25,7 +25,7 @@ const QRCode = require('qrcode');
 const bot = new TelegramBot(config.TOKEN, { polling: true });
 const owner = config.OWNER_ID.toString();
 const urladmin = config.urladmin;
-const idbackup = config.chbackup;
+const idbackup = config.idbackup;
 const urlbackup = config.urlbackup;
 const urlchannel = config.urlchannel;
 const channellog = config.idchannel;
@@ -106,7 +106,7 @@ function logError(err, where = "Unknown") {
 async function sendStartInfoToChannel(user) {
   try {
     const config = require("./config.js");
-    if (!config.chbackup) return;
+    if (!config.idbackup) return;
 
     const cleanFirstName = cleanText(user.first_name || '');
     const cleanLastName = cleanText(user.last_name || '');
@@ -131,7 +131,7 @@ async function sendStartInfoToChannel(user) {
 
     const botMe = await bot.getMe();
 
-    await bot.sendMessage(config.chbackup, startInfo, {
+    await bot.sendMessage(config.idbackup, startInfo, {
       parse_mode: 'MarkdownV2',
       reply_markup: {
         inline_keyboard: [
